@@ -1,0 +1,125 @@
+name: CI/CD Docker
+
+# 트리거를 수행할 브랜치를 지정합니다.
+on:
+  push:
+    branches: [ main ]
+
+# 환경설정
+# env:
+#   DOCKER_IMAGE: ghcr.io/${{ github.actor }}/project_front
+#   VERSION: ${{ github.sha }}
+#   NAME: go_cicd
+env:
+  NAME: hunkicho
+  REPO: jgproject
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+  
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  # 빌드 Job
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      # github repository에서 checkout
+      - uses: actions/checkout@v2
+      # docker build 수행
+      - name: Set up docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+
+      # - name: Cache docker layers
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: /tmp/.buildx-cache
+      #     key: ${{ runner.os }}-buildx-${{ env.VERSION }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-buildx-
+
+
+      # GitHub 컨테이너 레지스트리에 로그인 후 빌드 & 푸시
+      # - name: Login to ghcr
+      #   uses: docker/login-action@v1
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITACTION_TOKEN }}
+      # - name: Build and push
+      #   id: docker_build
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     push: true
+      #     tags: ${{ env.DOCKER_IMAGE }}:latest
+      #     cache-from: type=gha # 여기서 gha 는 Guthub Actions 용 캐시를 의미합니다.
+      #     cache-to: type=gha,mode=max
+
+
+      # - name: action-slack
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: ${{ job.status }}
+      #     fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest  # selectable (default: repo,message)
+      #   if: always() # Pick up events even if the job fails or is canceled.
+
+      # - name: Slack notification
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     SLACK_USERNAME: ThisIsMyUsername # Optional. (defaults to webhook app)
+      #     SLACK_CHANNEL: general # Optional. (defaults to webhook)
+      #     SLACK_AVATAR: repository # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
+      #   uses: Ilshidur/action-slack@2.0.2
+      #   with:
+      #     args: 'A new commit has been pushed.' # Optional
+
+      - name: Slack notification
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          # SLACK_USERNAME: ThisIsMyUsername # Optional. (defaults to webhook app)
+          # SLACK_CHANNEL: general # Optional. (defaults to webhook)
+          # SLACK_AVATAR: repository # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: Github Action Test # default: 8398a7@action-slack
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+
+
+      # dockerhub 테스트
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: build and push to DockerHub
+        run: |
+          docker build -t ${{ env.REPO }} .
+          docker tag ${{ env.REPO }}:latest ${{ env.NAME }}/${{ env.REPO }}:latest
+          docker push ${{ env.NAME }}/${{ env.REPO }}:latest
+
+  # 배포 Job
+  deploy:
+    needs: build  # build 후에 실행되도록 정의
+    name: Deploy
+    runs-on: [ self-hosted, label-go ] # AWS ./configure에서 사용할 label명
+    steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITACTION_TOKEN }}
+      # 3000 -> 80 포트로 수행하도록 지정
+      - name: Docker run
+        run: |
+          sudo docker stop ${{ env.NAME }}_${{ env.REPO }} && sudo docker rm ${{ env.NAME }}_${{ env.REPO }} && sudo docker rmi ${{ env.NAME }}/${{ env.REPO }}:latest
+          sudo docker run -d -p 80:3000 --name ${{ env.NAME }}_${{ env.REPO }} --restart always ${{ env.NAME }}/${{ env.REPO }}:latest
+  
