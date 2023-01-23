@@ -26,7 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # github repository에서 checkout
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
       # docker build 수행
       - name: Set up docker buildx
         id: buildx
@@ -87,11 +88,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # - name: build and push to DockerHub
+      #   run: |
+      #     docker build -t ${{ env.REPO }} .
+      #     docker tag ${{ env.REPO }}:latest ${{ env.NAME }}/${{ env.REPO }}:latest
+      #     docker push ${{ env.NAME }}/${{ env.REPO }}:latest
       - name: build and push to DockerHub
-        run: |
-          docker build -t ${{ env.REPO }} .
-          docker tag ${{ env.REPO }}:latest ${{ env.NAME }}/${{ env.REPO }}:latest
-          docker push ${{ env.NAME }}/${{ env.REPO }}:latest
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ env.NAME }}/${{ env.REPO }}:latest
+          cache-from: type:gha                         # gha는 github action용 캐시 의미
+          cache-to: type=gha,mode=max
 
   # 배포 Job
   deploy:
@@ -110,7 +119,7 @@ jobs:
         run: |
           sudo docker stop ${{ env.NAME }}_${{ env.REPO }} && sudo docker rm ${{ env.NAME }}_${{ env.REPO }} && sudo docker rmi ${{ env.NAME }}/${{ env.REPO }}:latest
           sudo docker run -d -p 80:3000 --name ${{ env.NAME }}_${{ env.REPO }} --restart always ${{ env.NAME }}/${{ env.REPO }}:latest
-          
+
       - name: Slack notification
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}

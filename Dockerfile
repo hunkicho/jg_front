@@ -7,9 +7,11 @@ RUN mkdir -p /app
 WORKDIR /app
 ADD . /app/
 
-RUN npm install -g pnpm
-RUN pnpm install
-RUN pnpm build
+# RUN npm install -g pnpm
+# RUN pnpm install
+# RUN pnpm build
+
+RUN npm install -g pnpm && pnpm install && pnpm build
 
 ENV HOST 0.0.0.0
 EXPOSE 3000
