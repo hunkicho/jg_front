@@ -93,13 +93,17 @@ jobs:
       #     docker build -t ${{ env.REPO }} .
       #     docker tag ${{ env.REPO }}:latest ${{ env.NAME }}/${{ env.REPO }}:latest
       #     docker push ${{ env.NAME }}/${{ env.REPO }}:latest
+
+      # github action에서는 docker cache가 동작하지 않는다.
+      # github actions의 러너는 매번 새로운 가상환경에서 실행되기 떄문에 모든 작업은 새롭게 다시 시작된다.
+      # 따라서 docker/build-push-actio를 이용하여 github actions에 직접 캐시를 저장시킨다.
       - name: build and push to DockerHub
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: ${{ env.NAME }}/${{ env.REPO }}:latest
-          cache-from: type:gha                         # gha는 github action용 캐시 의미
+          cache-from: type:gha                         # gha는 github action용 캐시 의미       
           cache-to: type=gha,mode=max
 
   # 배포 Job
