@@ -1,6 +1,7 @@
 # Nuxt 3 Minimal Starter
 # test deploy
 # jira 연동 되나요
+# 스피드 테스트
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
 ## Setup
