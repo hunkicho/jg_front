@@ -13,8 +13,8 @@ extends:
   - plugin:prettier/recommended
 overrides: []
 parserOptions:
-  ecmaVersion: latest
-  sourceType: module
+  ecmaVersion: latest               # 사용할 ECMA버전 설정
+  sourceType: module                # parser의 export 형태 설정
   project: ./tsconfig.json
 plugins:
   - vue
