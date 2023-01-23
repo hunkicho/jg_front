@@ -1,5 +1,11 @@
 <template>
-  <div>
-    <NuxtWelcome />
-  </div>
+  <header>header</header>
+  <nav>navigation</nav>
+  <section>
+    <article>article1</article>
+    <article>article2</article>
+    <article>article3</article>
+  </section>
+  <aside>aside</aside>
+  <footer>footer</footer>
 </template>
