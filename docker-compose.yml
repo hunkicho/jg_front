@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  nuxt_app:
+    build: .
+    ports:
+      - '3000:3000'
+
+  nginx:
+    build: ./config/nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - nuxt_app
