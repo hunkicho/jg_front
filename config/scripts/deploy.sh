@@ -24,7 +24,6 @@ then
 fi
 
 echo "start docker-compose up: ubuntu"
-
-docker ps -a | grep hunkicho/jg_front_nuxt:latest | awk '{print$1}' | xargs -t -I % docker rm -f % && docker image ls | grep hunkicho/jg_front_nuxt | awk '{print$3}' | xargs -I % docker rmi %
-docker ps -a | grep hunkicho/jg_front_nginx:latest | awk '{print$1}' | xargs -t -I % docker rm -f % && docker image ls | grep hunkicho/jg_front_nginx | awk '{print$3}' | xargs -I % docker rmi %
-cd ~ubuntu && sudo docker-compose -f up --build -d # 하이라이트 명령어
+docker ps -a | grep hunkicho/jg_front_nuxt:latest| awk '{print$1}' | xargs -t -I % docker rm -f % && docker image ls | grep hunkicho/jg_front_nuxt:latest | awk '{print$3}' | xargs -I % docker rmi %
+docker ps -a | grep hunkicho/jg_front_nginx:latest | awk '{print$1}' | xargs -t -I % docker rm -f % && docker image ls | grep hunkicho/jg_front_nginx:latest | awk '{print$3}' | xargs -I % docker rmi %
+cd ~ubuntu && sudo docker-compose -f up --build -d

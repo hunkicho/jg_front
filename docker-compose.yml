@@ -2,12 +2,12 @@ version: '3.7'
 
 services:
   nuxt_app:
-    build: .
+    image: jg_front_nuxt:latest
     ports:
       - '3000:3000'
 
   nginx:
-    build: ./config/nginx
+    image: jg_front_nginx
     ports:
       - '80:80'
     depends_on:
