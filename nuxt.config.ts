@@ -13,8 +13,8 @@ export default defineNuxtConfig({
       meta: [
         // <meta name="description" content="My amazing site">
         { name: 'description', content: 'My amazing site.' },
-        { name: 'og:title', content: '오지 메타테그'},
-        { name: 'og:description', content: '오지 디스크립션'}
+        { name: 'og:title', content: '오지 메타테그' },
+        { name: 'og:description', content: '오지 디스크립션' },
       ],
     },
   },
