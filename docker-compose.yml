@@ -10,5 +10,7 @@ services:
     image: hunkicho/jg_front_nginx:latest
     ports:
       - '80:80'
+    volumes:
+      - /var/log/nginx:/var/log/nginx
     depends_on:
       - nuxt_app
