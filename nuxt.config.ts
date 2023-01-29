@@ -18,4 +18,17 @@ export default defineNuxtConfig({
       ],
     },
   },
+  typescript: {
+    strict: true,
+  },
+  css: ['@/assets/css/tailwind.css'],
+  modules: ['@nuxtjs/tailwindcss'],
+  postcss: {
+    plugins: {
+      'postcss-import': {},
+      'tailwindcss/nesting': {},
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
 });
